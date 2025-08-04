@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { Stream } from 'stream';
 
+// CORREÇÃO: Lendo as variáveis de ambiente corretas para o backend
 const { BASEROW_API_KEY, BASEROW_API_URL } = process.env;
 
 if (!BASEROW_API_KEY || !BASEROW_API_URL) {
@@ -42,8 +43,6 @@ const fetchApi = async (endpoint: string, options: any = {}, isFileUpload: boole
   return response.json();
 };
 
-// --- FUNÇÃO PARA O WEBHOOKSERVICE ---
-// Exportada individualmente para ser usada pelo webhookService
 export const sendToBaserow = async (tableId: string, data: any) => {
     const endpoint = `/api/database/rows/table/${tableId}/?user_field_names=true`;
     return fetchApi(endpoint, {
@@ -52,37 +51,30 @@ export const sendToBaserow = async (tableId: string, data: any) => {
     });
 };
 
-// --- OBJETO PARA O SERVER.TS ---
-// Exportado como um objeto completo para ser usado pelo server.ts
 export const baserowServer = {
   get: (tableId: string, params: string = '') => {
     return fetchApi(`/api/database/rows/table/${tableId}/${params}`);
   },
-
   getRow: (tableId: string, rowId: number, params: string = '') => {
     return fetchApi(`/api/database/rows/table/${tableId}/${rowId}/${params}`);
   },
-
   post: (tableId: string, data: any) => {
     return fetchApi(`/api/database/rows/table/${tableId}/?user_field_names=true`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
-
   patch: (tableId: string, rowId: number, data: any) => {
     return fetchApi(`/api/database/rows/table/${tableId}/${rowId}/?user_field_names=true`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   },
-
   delete: (tableId: string, rowId: number) => {
     return fetchApi(`/api/database/rows/table/${tableId}/${rowId}/`, {
       method: 'DELETE',
     });
   },
-
   uploadFileFromBuffer: async (buffer: Buffer, fileName: string, mimetype: string) => {
     const form = new FormData();
     const bufferStream = new Stream.PassThrough();
