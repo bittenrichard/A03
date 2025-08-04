@@ -14,7 +14,8 @@
   "include": [
     "server.ts",
     "src/shared/services/baserowServerClient.ts",
-    "src/shared/services/webhookService.ts"
+    "src/shared/services/webhookService.ts",
+    "src/shared/types.ts"
   ],
   "exclude": [
     "node_modules"
