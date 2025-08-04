@@ -1,5 +1,3 @@
-// Local: src/App.tsx
-
 import React, { useEffect, useCallback, useState } from 'react';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { useNavigation } from './shared/hooks/useNavigation';
@@ -18,16 +16,18 @@ import { Loader2 } from 'lucide-react';
 import CandidateDatabasePage from './features/database/components/CandidateDatabasePage';
 import AgendaPage from './features/agenda/components/AgendaPage';
 import { useDataStore } from './shared/store/useDataStore';
+// Importações de DndProvider e HTML5Backend foram removidas deste arquivo para o main.tsx
 
-// IMPORTAÇÕES DO DndProvider e HTML5Backend
+import { AuthProvider } from './features/auth/context/AuthContext';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+
 
 const LoadingSpinner: React.FC = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50"><div className="text-center"><Loader2 className="mx-auto h-12 w-12 text-indigo-600 animate-spin" /><h2 className="mt-6 text-xl font-semibold text-gray-800">Carregando...</h2><p className="mt-2 text-gray-500">Estamos preparando tudo para você.</p></div></div>
 );
 
-function App() {
+function AppContent() {
   const { profile, isAuthenticated, isLoading: isAuthLoading, error: authError, signIn, signOut, signUp } = useAuth();
   const { currentPage, navigateTo } = useNavigation(isAuthenticated ? 'dashboard' : 'login');
   
@@ -116,11 +116,21 @@ function App() {
 
   return (
     <div className="font-inter antialiased">
-      {/* CORREÇÃO: Envolva a aplicação com o DndProvider */}
-      <DndProvider backend={HTML5Backend}>
-        <MainLayout currentPage={currentPage} user={profile} onNavigate={navigateTo} onLogout={handleLogout}>{renderContent()}</MainLayout>
-      </DndProvider>
+      <MainLayout currentPage={currentPage} user={profile} onNavigate={navigateTo} onLogout={handleLogout}>{renderContent()}</MainLayout>
     </div>
   );
 }
+
+function App() {
+  return (
+    // AQUI ESTÁ A CORREÇÃO PRINCIPAL
+    // Envolvemos a aplicação inteira no AuthProvider e DndProvider
+    <DndProvider backend={HTML5Backend}>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </DndProvider>
+  );
+}
+
 export default App;
