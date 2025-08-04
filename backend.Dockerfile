@@ -1,35 +1,42 @@
 # /a03/backend.Dockerfile
 
 # Estágio 1: Build do Código TypeScript
-# Esta primeira parte é o "ambiente de construção"
-FROM node:18-alpine as builder
+# Usamos uma imagem Node para compilar o TypeScript para JavaScript.
+FROM node:18-alpine AS builder
 
 WORKDIR /app
+
+# Copia os arquivos de definição de pacotes e o tsconfig
 COPY package.json package-lock.json tsconfig.json ./
-# Instala TODAS as dependências, incluindo as de desenvolvimento como o TypeScript
+
+# Instala todas as dependências (incluindo as de desenvolvimento como o TypeScript)
 RUN npm install
+
+# Copia todo o código-fonte (respeitando o .dockerignore)
 COPY . .
 
-# --- O PONTO CHAVE ESTÁ AQUI ---
-# Este comando executa o script "build" do seu package.json,
-# que chama o compilador TypeScript (tsc).
-# Ele converte todos os arquivos .ts para .js e os coloca na pasta /dist
-RUN npm run build
-# --------------------------------
+# --- CORREÇÃO APLICADA AQUI ---
+# Executa o script de build específico do backend que criamos no package.json
+RUN npm run build:backend
 
-# Estágio 2: Imagem Final de Produção
-# Agora, criamos a imagem final, que será menor e mais segura
+# Estágio 2: Imagem de Produção
+# Usamos uma imagem Node mais leve para a produção
 FROM node:18-alpine
 
 WORKDIR /app
+
+# Copia os arquivos de definição de pacotes
 COPY package.json package-lock.json ./
-# Instala APENAS as dependências de produção
+
+# Instala apenas as dependências de produção para uma imagem menor
 RUN npm install --omit=dev
 
-# Copia APENAS o JavaScript já compilado do estágio de build
+# Copia o código JavaScript já compilado do estágio de build
 COPY --from=builder /app/dist ./dist
 
+# Expõe a porta em que a API será executada
 EXPOSE 3001
 
-# Inicia o servidor usando o arquivo JavaScript compilado
+# Comando para iniciar o servidor Node.js
+# O servidor principal está em dist/server.js após a compilação
 CMD ["node", "dist/server.js"]
