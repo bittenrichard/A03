@@ -8,6 +8,7 @@ import cors from 'cors';
 import { google } from 'googleapis';
 import { baserowServer } from './src/shared/services/baserowServerClient.js';
 import fetch from 'node-fetch';
+// CORREÇÃO: Usando a biblioteca 'bcrypt' que está instalada no projeto
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 
