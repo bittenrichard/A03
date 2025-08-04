@@ -21,8 +21,8 @@ yarn-error.log*
 .git
 .gitignore
 
-# Ignora a pasta de configuração do Nginx (só é relevante para o build do frontend)
-/nginx
+# --- LINHA REMOVIDA DAQUI ---
+# A linha "/nginx" foi removida para que o build do frontend possa encontrar a pasta.
 
 # Ignora arquivos do Docker que não fazem parte do contexto do build em si
 frontend.Dockerfile
