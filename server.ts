@@ -8,7 +8,7 @@ import cors from 'cors';
 import { google } from 'googleapis';
 import { baserowServer } from './src/shared/services/baserowServerClient.js';
 import fetch from 'node-fetch';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import multer from 'multer';
 
 const app = express();

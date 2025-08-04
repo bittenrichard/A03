@@ -6,16 +6,15 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copia os arquivos de definição de pacotes e o tsconfig
-COPY package.json package-lock.json tsconfig.json ./
+# Copia os arquivos de definição de pacotes e os tsconfigs
+COPY package.json package-lock.json tsconfig.json tsconfig.server.json ./
 
-# Instala todas as dependências (incluindo as de desenvolvimento como o TypeScript)
+# Instala todas as dependências (incluindo as de desenvolvimento)
 RUN npm install
 
 # Copia todo o código-fonte (respeitando o .dockerignore)
 COPY . .
 
-# --- CORREÇÃO APLICADA AQUI ---
 # Executa o script de build específico do backend que criamos no package.json
 RUN npm run build:backend
 
