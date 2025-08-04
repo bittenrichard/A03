@@ -6,10 +6,8 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { google } from 'googleapis';
-// CORREÇÃO APLICADA: Importa o objeto 'baserowServer' que contém todos os métodos necessários.
 import { baserowServer } from './src/shared/services/baserowServerClient.js';
 import fetch from 'node-fetch';
-// CORREÇÃO APLICADA: A dependência instalada foi 'bcrypt', não 'bcryptjs'.
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 
@@ -36,7 +34,6 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 // --- CONSTANTES DE ID DE TABELAS ---
-// Usando variáveis de ambiente com um fallback para os IDs que você forneceu
 const USERS_TABLE_ID = process.env.BASEROW_USERS_TABLE_ID || '711';
 const VAGAS_TABLE_ID = process.env.BASEROW_VAGAS_TABLE_ID || '709';
 const CANDIDATOS_TABLE_ID = process.env.BASEROW_CANDIDATES_TABLE_ID || '710';
@@ -44,14 +41,12 @@ const WHATSAPP_CANDIDATOS_TABLE_ID = process.env.BASEROW_WHATSAPP_TABLE_ID || '7
 const AGENDAMENTOS_TABLE_ID = process.env.BASEROW_SCHEDULES_TABLE_ID || '713';
 const SALT_ROUNDS = 10;
 
-// Definir um tipo básico para as vagas que vêm do Baserow
 interface BaserowJobPosting {
   id: number;
   titulo: string;
   usuario?: { id: number; value: string }[];
 }
 
-// Definir um tipo básico para os candidatos que vêm do Baserow
 interface BaserowCandidate {
   id: number;
   vaga?: { id: number; value: string }[] | string | null;
@@ -79,9 +74,8 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
 
   try {
     const emailLowerCase = email.toLowerCase();
-    // NOTA: O 'field_7373' é o ID do campo 'Email' na sua tabela Baserow.
-    // É mais robusto usar o ID do campo do que o nome 'Email'.
-    const { results: existingUsers } = await baserowServer.get(USERS_TABLE_ID, `?filter__field_7373__equal=${emailLowerCase}`);
+    // CORREÇÃO: Usando o nome do campo 'Email' em vez do ID fixo
+    const { results: existingUsers } = await baserowServer.get(USERS_TABLE_ID, `?filter__Email__equal=${emailLowerCase}`);
     
     if (existingUsers && existingUsers.length > 0) {
       return res.status(409).json({ error: 'Este e-mail já está cadastrado.' });
@@ -122,7 +116,8 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
 
   try {
     const emailLowerCase = email.toLowerCase();
-    const { results: users } = await baserowServer.get(USERS_TABLE_ID, `?filter__field_7373__equal=${emailLowerCase}`);
+    // CORREÇÃO: Usando o nome do campo 'Email' em vez do ID fixo
+    const { results: users } = await baserowServer.get(USERS_TABLE_ID, `?filter__Email__equal=${emailLowerCase}`);
     const user = users && users[0];
 
     if (!user || !user.senha_hash) {
@@ -360,7 +355,7 @@ app.get('/api/data/all/:userId', async (req: Request, res: Response) => {
 
   try {
     // Busca todas as vagas
-    const jobsResult = await baserowServer.get(VAGAS_TABLE_ID, '?size=200'); // Aumentado o size para garantir que busca todas
+    const jobsResult = await baserowServer.get(VAGAS_TABLE_ID, '?size=200');
     const allJobs: BaserowJobPosting[] = (jobsResult.results || []) as BaserowJobPosting[];
     // Filtra vagas por usuário
     const userJobs = allJobs.filter((j: BaserowJobPosting) => j.usuario && j.usuario.some((u: any) => u.id === parseInt(userId)));
@@ -505,7 +500,7 @@ app.get('/api/schedules/:userId', async (req: Request, res: Response) => {
   }
 
   try {
-    const { results } = await baserowServer.get(AGENDAMENTOS_TABLE_ID, `?filter__field_7402__link_row_has=${userId}&size=200`); // Usando o ID do campo 'Candidato'
+    const { results } = await baserowServer.get(AGENDAMENTOS_TABLE_ID, `?filter__Candidato__usuario__link_row_has=${userId}&size=200`);
     res.json({ success: true, results: results || [] });
   } catch (error: any) {
     console.error('Erro ao buscar agendamentos (backend):', error);
